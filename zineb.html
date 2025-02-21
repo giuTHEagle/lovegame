@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Game for You</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #ffe6f2;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Prevents scrolling if messages go off-screen */
+        }
+        #heartContainer {
+            position: relative;
+        }
+        #heart {
+            font-size: 100px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        #heart:hover {
+            transform: scale(1.1);
+        }
+        #speech {
+            position: absolute;
+            background-color: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            display: none;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        #progressContainer {
+            width: 300px;
+            height: 30px;
+            background-color: #ddd;
+            border-radius: 15px;
+            margin-top: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+        #progressBar {
+            width: 0;
+            height: 100%;
+            background-color: #ff3366;
+            border-radius: 15px;
+            transition: width 0.5s ease, transform 0.2s;
+        }
+        #progressText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 16px;
+            color: #333;
+            font-weight: bold;
+        }
+        #surprise {
+            font-size: 24px;
+            color: #ff6699;
+            text-align: center;
+            margin-top: 20px;
+            display: none;
+        }
+        #message {
+            font-size: 36px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+            color: #ff3366;
+        }
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        @keyframes burst {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(0); }
+        }
+        @keyframes popIn {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .bounce { animation: bounce 0.3s; }
+        .pulse { animation: pulse 0.3s; }
+        .burst { animation: burst 0.5s forwards; }
+        .popIn { animation: popIn 0.3s forwards; }
+    </style>
+</head>
+<body>
+    <div id="heartContainer">
+        <div id="heart">❤️</div>
+        <div id="speech"></div>
+    </div>
+    <div id="progressContainer">
+        <div id="progressBar"></div>
+        <div id="progressText">0% - Click me!</div>
+    </div>
+    <div id="surprise">Almost there! Keep clicking! 😉</div>
+    <div id="message"></div>
+    <audio id="clickSound" src="click.mp3"></audio>
+    <audio id="finalSound" src="final.mp3"></audio>
+
+    <script>
+        let clicks = 0;
+        const heart = document.getElementById('heart');
+        const speech = document.getElementById('speech');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+        const progressContainer = document.getElementById('progressContainer');
+        const surprise = document.getElementById('surprise');
+        const message = document.getElementById('message');
+        const clickSound = document.getElementById('clickSound');
+        const finalSound = document.getElementById('finalSound');
+
+        const funnyMessages = [
+            "Ouch, that tickles!",
+            "Hey, stop poking me!",
+            "I'm blushing!",
+            "You're making my heart race!",
+            "Careful, I might burst!"
+        ];
+
+        const progressLabels = [
+            "20% - Love fuel loading!",
+            "40% - Heartbeat accelerating!",
+            "60% - To Love Town we go!",
+            "80% - Almost at peak mushiness!",
+            "100% - Love overload achieved!"
+        ];
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
+        function showRandomSpeech() {
+            const randomIndex = Math.floor(Math.random() * funnyMessages.length);
+            speech.textContent = funnyMessages[randomIndex];
+
+            // Get window dimensions
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const speechWidth = speech.offsetWidth;
+            const speechHeight = speech.offsetHeight;
+
+            // Calculate random position, ensuring it stays fully visible
+            const maxX = windowWidth - speechWidth - 20; // 20px buffer
+            const maxY = windowHeight - speechHeight - 20;
+            const randomX = Math.floor(Math.random() * maxX);
+            const randomY = Math.floor(Math.random() * maxY);
+
+            speech.style.left = `${randomX}px`;
+            speech.style.top = `${randomY}px`;
+            speech.style.display = 'block';
+            speech.classList.add('popIn');
+
+            setTimeout(() => {
+                speech.style.opacity = '0';
+                setTimeout(() => {
+                    speech.style.display = 'none';
+                    speech.style.opacity = '1'; // Reset for next time
+                    speech.classList.remove('popIn');
+                }, 300);
+            }, 2000);
+        }
+
+        heart.addEventListener('click', function() {
+            clicks++;
+            if (clicks <= 5) {
+                clickSound.play();
+                heart.style.color = getRandomColor();
+                heart.classList.add('bounce');
+                progressBar.style.width = `${clicks * 20}%`;
+                progressBar.style.backgroundColor = getRandomColor();
+                progressBar.classList.add('pulse');
+                setTimeout(() => {
+                    heart.classList.remove('bounce');
+                    progressBar.classList.remove('pulse');
+                }, 300);
+
+                if (clicks < 5) {
+                    showRandomSpeech();
+                    progressText.textContent = progressLabels[clicks - 1];
+                }
+
+                if (clicks == 3) {
+                    surprise.style.display = 'block';
+                    setTimeout(() => surprise.style.display = 'none', 3000);
+                }
+
+                if (clicks == 5) {
+                    progressText.textContent = progressLabels[4];
+                    setTimeout(() => {
+                        progressContainer.classList.add('burst');
+                        finalSound.play();
+                        setTimeout(() => {
+                            heart.style.display = 'none';
+                            progressContainer.style.display = 'none';
+                            message.style.display = 'block';
+                            message.textContent = 'I love you so much, ZINEB! ❤️';
+                        }, 500);
+                    }, 500);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
