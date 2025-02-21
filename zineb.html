@@ -14,7 +14,6 @@
             margin: 0;
             background-color: #ffe6f2;
             font-family: Arial, sans-serif;
-            overflow: hidden; /* Prevents scrolling if messages go off-screen */
         }
         #heartContainer {
             position: relative;
@@ -29,12 +28,18 @@
         }
         #speech {
             position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            top: -80px; /* Adjusted to fit larger text */
             background-color: white;
-            padding: 10px;
+            padding: 10px 15px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0,0,0,0.2);
             display: none;
             white-space: nowrap;
+            font-size: 24px; /* Bigger text */
+            font-weight: bold; /* Bold */
+            color: black; /* Black */
             opacity: 0;
             transition: opacity 0.3s;
         }
@@ -78,9 +83,9 @@
             color: #ff3366;
         }
         @keyframes bounce {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
+            0% { transform: translateX(-50%) scale(1); } /* Adjusted for centering */
+            50% { transform: translateX(-50%) scale(1.2); }
+            100% { transform: translateX(-50%) scale(1); }
         }
         @keyframes pulse {
             0% { transform: scale(1); }
@@ -93,9 +98,9 @@
             100% { transform: scale(0); }
         }
         @keyframes popIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            50% { opacity: 1; transform: scale(1.1); }
-            100% { opacity: 1; transform: scale(1); }
+            0% { opacity: 0; transform: translateX(-50%) scale(0.8); }
+            50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+            100% { opacity: 1; transform: translateX(-50%) scale(1); }
         }
         .bounce { animation: bounce 0.3s; }
         .pulse { animation: pulse 0.3s; }
@@ -154,24 +159,9 @@
             return color;
         }
 
-        function showRandomSpeech() {
+        function showSpeech() {
             const randomIndex = Math.floor(Math.random() * funnyMessages.length);
             speech.textContent = funnyMessages[randomIndex];
-
-            // Get window dimensions
-            const windowWidth = window.innerWidth;
-            const windowHeight = window.innerHeight;
-            const speechWidth = speech.offsetWidth;
-            const speechHeight = speech.offsetHeight;
-
-            // Calculate random position, ensuring it stays fully visible
-            const maxX = windowWidth - speechWidth - 20; // 20px buffer
-            const maxY = windowHeight - speechHeight - 20;
-            const randomX = Math.floor(Math.random() * maxX);
-            const randomY = Math.floor(Math.random() * maxY);
-
-            speech.style.left = `${randomX}px`;
-            speech.style.top = `${randomY}px`;
             speech.style.display = 'block';
             speech.classList.add('popIn');
 
@@ -182,7 +172,7 @@
                     speech.style.opacity = '1'; // Reset for next time
                     speech.classList.remove('popIn');
                 }, 300);
-            }, 4000); // Changed from 2000 to 4000 for 4 seconds
+            }, 4000); // 4 seconds duration
         }
 
         heart.addEventListener('click', function() {
@@ -200,7 +190,7 @@
                 }, 300);
 
                 if (clicks < 5) {
-                    showRandomSpeech();
+                    showSpeech();
                     progressText.textContent = progressLabels[clicks - 1];
                 }
 
